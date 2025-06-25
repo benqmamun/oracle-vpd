@@ -75,10 +75,10 @@ END;
 🛡️ Part 5: Apply VPD Policy on CUSTOMER Table
 BEGIN
   DBMS_RLS.ADD_POLICY (
-    object_schema    => 'SEP2',                -- Replace with your schema if different
+    object_schema    => 'SCHEMA',                -- Replace with your schema if different
     object_name      => 'CUSTOMER',
     policy_name      => 'customer_vpd',
-    function_schema  => 'SEP2',
+    function_schema  => 'SCHEMA',
     policy_function  => 'customer_vpd_fn',
     statement_types  => 'SELECT, INSERT, UPDATE, DELETE',
     update_check     => TRUE
