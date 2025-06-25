@@ -1,1 +1,3 @@
 # 🔐 Oracle APEX – VPD (Virtual Private Database) Setup
+
+<pre> ```sql CREATE TABLE company ( company_id NUMBER PRIMARY KEY, company_name VARCHAR2(100) ); ``` </pre>
