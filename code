@@ -1,3 +1,80 @@
-# 🔐 Oracle APEX – VPD (Virtual Private Database) Setup
+Oracle APEX VPD (Virtual Private Database) – Full Setup Guide
+✅ Part 1: Setup Tables and Dummy Data
 
-<pre> ```sql CREATE TABLE company ( company_id NUMBER PRIMARY KEY, company_name VARCHAR2(100) ); ``` </pre>
+Step 1.1 – Create COMPANY Table:
+CREATE TABLE company (
+  company_id   NUMBER PRIMARY KEY,
+  company_name VARCHAR2(100)
+);
+
+Step 1.2 – Create CUSTOMER Table:
+CREATE TABLE customer (
+  cust_id     NUMBER PRIMARY KEY,
+  cust_name   VARCHAR2(100),
+  company_id  NUMBER,
+  CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES company(company_id)
+);
+
+
+Step 1.3 – Insert Sample Data:
+INSERT INTO company VALUES (100, 'Mamun Ltd');
+INSERT INTO company VALUES (200, 'Yamin Corp');
+
+INSERT INTO customer VALUES (1, 'Mamun Traders', 100);
+INSERT INTO customer VALUES (2, 'Sadia Mart', 100);
+INSERT INTO customer VALUES (3, 'Hasan Store', 200);
+COMMIT;
+
+🧠 Part 2: Create Application Context
+Step 2.1 – Create Context:
+CREATE OR REPLACE CONTEXT app_vd USING set_ctx;    //⚠️ If you see an INSUFFICIENT PRIVILEGES error, make sure to run the following as a DBA: GRANT EXECUTE ON DBMS_RLS TO your_schema_name;
+
+📦 Part 3: Create Package to Set Context
+Step 3.1 – Package Specification:
+
+CREATE OR REPLACE PACKAGE set_ctx AS
+  PROCEDURE set_company(p_company_id NUMBER);
+END;
+/
+
+Step 3.2 – Package Body:
+CREATE OR REPLACE PACKAGE BODY set_ctx AS
+  PROCEDURE set_company(p_company_id NUMBER) IS
+  BEGIN
+    DBMS_SESSION.SET_CONTEXT('app_vd', 'company_id', p_company_id);
+  END;
+END;
+/
+
+🔎 Part 4: Create VPD Policy Function
+CREATE OR REPLACE FUNCTION customer_vpd_fn (
+  schema_name  IN VARCHAR2,
+  table_name   IN VARCHAR2
+) RETURN VARCHAR2 IS
+BEGIN
+  RETURN 'company_id = SYS_CONTEXT(''app_vd'', ''company_id'')';
+END;
+/
+
+
+🛡️ Part 5: Apply VPD Policy on CUSTOMER Table
+BEGIN
+  DBMS_RLS.ADD_POLICY (
+    object_schema    => 'SEP2',                -- Replace with your schema if different
+    object_name      => 'CUSTOMER',
+    policy_name      => 'customer_vpd',
+    function_schema  => 'SEP2',
+    policy_function  => 'customer_vpd_fn',
+    statement_types  => 'SELECT, INSERT, UPDATE, DELETE',
+    update_check     => TRUE
+  );
+END;
+/
+
+🚀 Run the Context (to simulate a logged-in company)
+
+BEGIN
+  set_ctx.set_company(100);  -- You can change this to 200 to test other company data
+END;
+
+
