@@ -89,7 +89,7 @@ END;
 🚀 Run the Context (to simulate a logged-in company)
 
 BEGIN
-  set_ctx.set_company(100);  -- You can change this to 200 to test other company data
+  set_ctx.set_company(100);  -- You can change this 200 to test other company data
 END;
 
 
